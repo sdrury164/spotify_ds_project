@@ -33,6 +33,12 @@ def get_db_table(db_conn, table_name):
     data = cursor.fetchall()
     return data
 
+"""
+This is the function to use to actually load in a table from
+the DB. It makes use of the above two functions (get_df_from_db()
+and get_db_table()).
+Input: connection to SQL table object from sqlite3
+"""
 def get_df_from_table_name(db_conn, table_name, cols):
     data = get_db_table(db_conn, table_name)
     df = get_df_from_db(data, cols)
@@ -319,17 +325,6 @@ def get_col_dict():
         'coherence_score'
     ]
 
-    """
-conn.execute('''CREATE TABLE IF NOT EXISTS LDA_COHERENCES
-                (filename TEXT NOT NULL,
-                coherence_type TEXT NOT NULL,
-                num_topics INT,
-                chunksize INT,
-                passes INT,
-                iterations INT,
-                coherence_score FLOAT NOT NULL);''')
-    """
-
     table_names = [
         'ALBUMS',
         'TRACKS',
@@ -374,6 +369,9 @@ conn.execute('''CREATE TABLE IF NOT EXISTS LDA_COHERENCES
 
     return col_dict
 
+"""
+Quick way to check what tables are in the SQL database.
+"""
 def list_tables(return_list=False):
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
@@ -382,6 +380,11 @@ def list_tables(return_list=False):
     if return_list == True:
         return table_list
 
+"""
+Read in Pitchfork review genres dataframe. This returns the REVIEWS table combined
+with one-hot encoded genre information as a dataframe. Note that Pitchfork genre
+labels are not neccesarily the same as Spotify genre labels.
+"""
 def get_review_genres_df():
     review_genres = pd.read_excel('review_genres.xlsx')
     col_dict = get_col_dict()
@@ -433,6 +436,12 @@ def get_review_genres_df():
 
     return album_genre_df
 
+"""
+Quickly retrieve ALBUMS table joined with ARTISTS table via IDs in the
+ARTIST_ON_ALBUM table as a dataframe. This function doesn't do anything
+that can't be done with other functions, but this dataframe is needed
+often enough that it helps to have a function just to generate it.
+"""
 def get_albums_w_artists():
     col_dict = get_col_dict()
     albums = get_df_from_table_name(conn, 'ALBUMS', col_dict['albums'])
